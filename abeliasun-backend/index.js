@@ -51,7 +51,13 @@ app.get("/api", (req, res) => {
   res.send("API is running");
 });
 
+app.get("/", (req, res) => {
+  res.send("Backend is running!");
+});
+
 // Démarrage du serveur
 app.listen(process.env.PORT || 4000, () => {
-  console.log(`Server running on http://localhost:4000`);
+  console.log(
+    `Server running on https://abeliasun-backend-5c08804f47f8.herokuapp.com/api`
+  );
 });

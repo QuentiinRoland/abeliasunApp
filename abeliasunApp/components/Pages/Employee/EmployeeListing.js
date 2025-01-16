@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
+  SafeAreaView,
 } from "react-native";
 import { getEmployees } from "../../../services/apiEmployee";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -136,6 +137,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F5F5F5",
+    paddingBottom: 90,
   },
   header: {
     backgroundColor: "#FFF",
@@ -214,7 +216,7 @@ const styles = StyleSheet.create({
     left: 16,
     right: 16,
     bottom: 16,
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#00b341",
     padding: 16,
     borderRadius: 12,
     alignItems: "center",
@@ -223,6 +225,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
+    marginRight: 30,
   },
   addButtonText: {
     color: "#FFF",

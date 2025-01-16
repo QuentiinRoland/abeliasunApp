@@ -43,7 +43,7 @@
     "react-native-signature-canvas": "^4.7.2",
     "react-native-vector-icons": "^10.2.0",
     "react-native-web": "~0.19.10",
-    "react-native-webview": "13.8.6",
+    "react-native-webview": "^13.13.1",
     "stream-browserify": "^3.0.0"
   },
   "devDependencies": {
