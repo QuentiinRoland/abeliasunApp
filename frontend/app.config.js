@@ -7,10 +7,10 @@ export default {
     version: "1.0.0",
     entryPoint: "App.js",
     orientation: "portrait",
-    icon: "./assets/iconApp.png",
+    icon: "./assets/iconAppAbeliasun.png",
     userInterfaceStyle: "light",
     splash: {
-      image: "./assets/splash.png",
+      image: "./assets/abeliasunSplash.png",
       resizeMode: "contain",
       backgroundColor: "#ffffff",
     },
