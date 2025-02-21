@@ -14,15 +14,33 @@ export default {
       resizeMode: "contain",
       backgroundColor: "#ffffff",
     },
+    plugins: [
+      "expo-router",
+      [
+        "expo-build-properties",
+        {
+          ios: {
+            useFrameworks: "static",
+          },
+        },
+      ],
+    ],
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.abeliasun.abeliasunApp",
+      buildNumber: "1",
+      infoPlist: {
+        LSApplicationQueriesSchemes: ["itms-apps"],
+        UIBackgroundModes: ["remote-notification"],
+      },
     },
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff",
       },
+      package: "com.abeliasun.abeliasunApp",
+      versionCode: 1,
     },
     web: {
       favicon: "./assets/favicon.png",
@@ -39,5 +57,13 @@ export default {
       FIREBASE_APP_ID: process.env.FIREBASE_APP_ID,
       FIREBASE_MEASUREMENT_ID: process.env.FIREBASE_MEASUREMENT_ID,
     },
+    updates: {
+      fallbackToCacheTimeout: 0,
+      url: "https://u.expo.dev/67b32402-2efc-40f4-b0d7-739644ca11ea",
+    },
+    runtimeVersion: {
+      policy: "sdkVersion",
+    },
+    assetBundlePatterns: ["**/*"],
   },
 };
