@@ -1,279 +1,183 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
+  Text,
   View,
+  StyleSheet,
+  Image,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  Alert,
-  ScrollView,
-  Text,
+  ImageBackground,
+  SafeAreaView,
+  Platform,
+  Keyboard,
 } from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import { updateCustomer } from "../../../services/apiCustomer";
+import { useNavigation } from "@react-navigation/native";
+import { auth, signInWithEmailAndPassword } from "../../../config/firebaseInit";
 
-const EditCustomer = ({ route, navigation }) => {
-  const { customer } = route.params;
-  const [name, setName] = useState(customer.name);
-  const [email, setEmail] = useState(customer.email);
-  const [phone, setPhone] = useState(customer.phone);
-  const [street, setStreet] = useState(customer.street);
-  const [city, setCity] = useState(customer.city);
-  const [postalCode, setPostalCode] = useState(customer.postalCode);
-  const [newEmail, setNewEmail] = useState("");
-  const [additionalEmails, setAdditionalEmails] = useState(
-    customer.additionalEmails || []
-  );
+const LoginPage = ({ onLogin }) => {
+  const navigation = useNavigation();
+  const [inputEmail, setInputEmail] = useState("");
+  const [inputPassword, setInputPassword] = useState("");
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
-  const addEmail = () => {
-    if (!newEmail) {
-      Alert.alert("Erreur", "Veuillez entrer une adresse email");
-      return;
-    }
-
-    if (!/\S+@\S+\.\S+/.test(newEmail)) {
-      Alert.alert("Erreur", "Veuillez entrer une adresse email valide");
-      return;
-    }
-
-    if (newEmail === email || additionalEmails.includes(newEmail)) {
-      Alert.alert("Erreur", "Cette adresse email existe déjà");
-      return;
-    }
-
-    setAdditionalEmails([...additionalEmails, newEmail]);
-    setNewEmail("");
-  };
-
-  const removeEmail = (emailToRemove) => {
-    setAdditionalEmails(
-      additionalEmails.filter((email) => email !== emailToRemove)
+  useEffect(() => {
+    const keyboardWillShow = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
+      () => setKeyboardVisible(true)
     );
-  };
+    const keyboardWillHide = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
+      () => setKeyboardVisible(false)
+    );
 
-  const handleUpdate = async () => {
-    try {
-      await updateCustomer(customer.id, {
-        name,
-        email,
-        additionalEmails,
-        phone,
-        street,
-        city,
-        postalCode,
-      });
-      Alert.alert("Succès", "Le client a été modifié avec succès !");
-      navigation.navigate("CustomerListing");
-    } catch (error) {
-      console.error("Erreur lors de la mise à jour :", error);
-      Alert.alert("Erreur", "Impossible de modifier le client.");
+    return () => {
+      keyboardWillShow.remove();
+      keyboardWillHide.remove();
+    };
+  }, []);
+
+  const handleInputName = (text) => setInputEmail(text);
+  const handleInputPassword = (text) => setInputPassword(text);
+
+  const handleLogin = async () => {
+    if (inputEmail && inputPassword) {
+      try {
+        await signInWithEmailAndPassword(auth, inputEmail, inputPassword);
+        onLogin && onLogin();
+      } catch (error) {
+        alert("Erreur lors de la connexion : " + error.message);
+      }
+    } else {
+      alert("Veuillez remplir tous les champs.");
     }
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.scrollViewContainer}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={styles.card}>
-        <Text style={styles.title}>Modifier le client</Text>
+    <SafeAreaView style={styles.safeArea}>
+      {!keyboardVisible && (
+        <View style={styles.topSection}>
+          <ImageBackground
+            source={require("../../../assets/abeliasunLogin2.jpg")}
+            style={styles.backgroundImage}
+          >
+            <View style={styles.darkOverlay}>
+              <Text style={styles.title}>
+                Transformez Votre Jardin en Un Havre de Paix et de Beauté
+              </Text>
+            </View>
+          </ImageBackground>
+        </View>
+      )}
 
-        <Text style={styles.label}>Nom</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Nom"
-          value={name}
-          onChangeText={setName}
+      <View
+        style={[
+          styles.loginSection,
+          keyboardVisible && styles.loginSectionExpanded,
+        ]}
+      >
+        <Image
+          source={require("../../../assets/abeliasunWallpaperLogin.jpg")}
+          style={styles.logo}
         />
-
-        <Text style={styles.label}>Email principal</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-
-        <Text style={styles.label}>Emails additionnels</Text>
-        <View style={styles.emailInputContainer}>
+        <View style={styles.inputContainer}>
           <TextInput
-            style={styles.emailInput}
-            placeholder="Nouvel email additionnel"
-            value={newEmail}
-            onChangeText={setNewEmail}
+            placeholder="Votre adresse mail"
+            placeholderTextColor="#888"
+            style={styles.input}
+            onChangeText={handleInputName}
+            value={inputEmail}
             keyboardType="email-address"
             autoCapitalize="none"
           />
-          <TouchableOpacity style={styles.addButton} onPress={addEmail}>
-            <Icon name="add" size={24} color="#FFF" />
+          <TextInput
+            placeholder="Votre mot de passe"
+            placeholderTextColor="#888"
+            secureTextEntry
+            style={styles.input}
+            onChangeText={handleInputPassword}
+            value={inputPassword}
+          />
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+            <Text style={styles.buttonTextLogin}>Login</Text>
           </TouchableOpacity>
         </View>
-
-        {additionalEmails.map((additionalEmail, index) => (
-          <View key={index} style={styles.emailChip}>
-            <Text style={styles.emailChipText}>{additionalEmail}</Text>
-            <TouchableOpacity
-              onPress={() => removeEmail(additionalEmail)}
-              style={styles.removeButton}
-            >
-              <Icon name="close" size={20} color="#666" />
-            </TouchableOpacity>
-          </View>
-        ))}
-
-        <Text style={styles.label}>Téléphone</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Téléphone"
-          value={phone}
-          onChangeText={setPhone}
-          keyboardType="phone-pad"
-        />
-
-        <Text style={styles.label}>Adresse</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Rue"
-          value={street}
-          onChangeText={setStreet}
-        />
-
-        <View style={styles.row}>
-          <TextInput
-            style={[styles.input, styles.cityInput]}
-            placeholder="Ville"
-            value={city}
-            onChangeText={setCity}
-          />
-          <TextInput
-            style={[styles.input, styles.postalInput]}
-            placeholder="Code postal"
-            value={postalCode}
-            onChangeText={setPostalCode}
-            keyboardType="numeric"
-          />
-        </View>
-
-        <TouchableOpacity style={styles.updateButton} onPress={handleUpdate}>
-          <Icon name="save" size={24} color="#FFF" />
-          <Text style={styles.updateButtonText}>
-            Enregistrer les modifications
-          </Text>
-        </TouchableOpacity>
       </View>
-    </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: "#fff",
   },
-  scrollViewContainer: {
-    padding: 20,
-    paddingBottom: 100,
+  topSection: {
+    height: "45%",
   },
-  card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
+  backgroundImage: {
+    width: "100%",
+    height: "100%",
+  },
+  darkOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    paddingHorizontal: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: "bold",
-    color: "#333",
-    marginBottom: 20,
-    textAlign: "center",
+    color: "#fff",
+    textAlign: "left",
+    maxWidth: 300,
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: -1, height: 1 },
+    textShadowRadius: 10,
   },
-  label: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#555",
-    marginBottom: 8,
+  loginSection: {
+    height: "55%",
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    marginTop: -30,
+    padding: 20,
+    alignItems: "center",
+  },
+  loginSectionExpanded: {
+    height: "100%",
+    marginTop: 0,
+  },
+  logo: {
+    width: 200,
+    height: 80,
+    marginVertical: 20,
+  },
+  inputContainer: {
+    width: "100%",
+    paddingHorizontal: 20,
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    backgroundColor: "#F8F9FA",
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 25,
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    marginBottom: 15,
     fontSize: 16,
-    marginBottom: 16,
+    color: "#000",
+    width: "100%",
   },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
+  loginButton: {
+    backgroundColor: "#000",
+    paddingVertical: 15,
+    borderRadius: 25,
+    alignItems: "center",
+    marginTop: 10,
   },
-  cityInput: {
-    flex: 1,
-    marginRight: 8,
-  },
-  postalInput: {
-    flex: 1,
-  },
-  emailInputContainer: {
-    flexDirection: "row",
-    marginBottom: 12,
-  },
-  emailInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    backgroundColor: "#F8F9FA",
-    padding: 12,
-    borderRadius: 8,
+  buttonTextLogin: {
     fontSize: 16,
-    marginRight: 8,
-  },
-  addButton: {
-    backgroundColor: "#4CAF50",
-    width: 48,
-    height: 48,
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emailChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#E3F2FD",
-    borderRadius: 20,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginBottom: 8,
-  },
-  emailChipText: {
-    flex: 1,
-    fontSize: 14,
-    color: "#1976D2",
-  },
-  removeButton: {
-    padding: 4,
-  },
-  updateButton: {
-    backgroundColor: "#2196F3",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 16,
-    borderRadius: 8,
-    marginTop: 16,
-  },
-  updateButtonText: {
-    color: "#FFF",
-    fontSize: 16,
-    fontWeight: "600",
-    marginLeft: 8,
+    fontWeight: "bold",
+    color: "#fff",
   },
 });
 
-export default EditCustomer;
+export default LoginPage;

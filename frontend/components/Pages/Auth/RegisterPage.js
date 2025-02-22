@@ -3,7 +3,7 @@ import { View, Text, Alert, TextInput, Button } from "react-native";
 import {
   auth,
   createUserWithEmailAndPassword,
-} from "../../../config/firebaseConfig";
+} from "../../../config/firebaseInit";
 
 const RegisterPage = ({ navigation }) => {
   const [email, setEmail] = useState("");

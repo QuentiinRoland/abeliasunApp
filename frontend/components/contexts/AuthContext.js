@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { onAuthStateChanged, getAuth, signOut } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { auth } from "../../config/firebaseConfig";
+import { auth } from "../../config/firebaseInit";
 
 export const AuthContext = createContext();
 

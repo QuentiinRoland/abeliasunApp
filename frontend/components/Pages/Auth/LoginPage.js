@@ -8,14 +8,12 @@ import {
   TouchableOpacity,
   ImageBackground,
   KeyboardAvoidingView,
-  ScrollView,
   Platform,
+  Keyboard,
+  ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import {
-  auth,
-  signInWithEmailAndPassword,
-} from "../../../config/firebaseConfig";
+import { auth, signInWithEmailAndPassword } from "../../../config/firebaseInit";
 
 const LoginPage = ({ onLogin }) => {
   const navigation = useNavigation();
@@ -42,56 +40,65 @@ const LoginPage = ({ onLogin }) => {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
     >
+      <ImageBackground
+        source={require("../../../assets/abeliasunLogin2.jpg")}
+        style={styles.backgroundImage}
+      >
+        <View style={styles.darkOverlay}>
+          <View style={styles.overlay}>
+            <Text style={styles.title}>
+              Transformez Votre Jardin en Un Havre de Paix et de Beauté
+            </Text>
+          </View>
+        </View>
+      </ImageBackground>
+
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
+        style={styles.loginSection}
+        contentContainerStyle={styles.scrollViewContent}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.container}>
-          <ImageBackground
-            source={require("../../../assets/LoginPage/abeliasunLogin2.jpg")}
-            style={styles.backgroundImage}
+        <Image
+          source={require("../../../assets/abeliasunWallpaperLogin.jpg")}
+          style={styles.logo}
+        />
+        <View style={styles.inputContainer}>
+          <TextInput
+            placeholder="Votre adresse mail"
+            placeholderTextColor="#888"
+            style={styles.input}
+            onChangeText={handleInputName}
+            value={inputEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            returnKeyType="next"
+          />
+          <TextInput
+            placeholder="Votre mot de passe"
+            placeholderTextColor="#888"
+            secureTextEntry
+            style={styles.input}
+            onChangeText={handleInputPassword}
+            value={inputPassword}
+            returnKeyType="done"
+            onSubmitEditing={() => {
+              Keyboard.dismiss();
+              handleLogin();
+            }}
+          />
+        </View>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={() => {
+              Keyboard.dismiss();
+              handleLogin();
+            }}
           >
-            <View style={styles.darkOverlay}>
-              <View style={styles.overlay}>
-                <Text style={styles.title}>
-                  Transformez Votre Jardin en Un Havre de Paix et de Beauté
-                </Text>
-              </View>
-            </View>
-          </ImageBackground>
-
-          <View style={styles.loginSection}>
-            <Image
-              source={require("../../../assets/LoginPage/abeliasun-logo.png")}
-              style={styles.logo}
-            />
-            <View style={styles.inputContainer}>
-              <TextInput
-                placeholder="Votre adresse mail"
-                placeholderTextColor="#888"
-                style={styles.input}
-                onChangeText={handleInputName}
-                value={inputEmail}
-              />
-              <TextInput
-                placeholder="Votre mot de passe"
-                placeholderTextColor="#888"
-                secureTextEntry
-                style={styles.input}
-                onChangeText={handleInputPassword}
-                value={inputPassword}
-              />
-            </View>
-            <View style={styles.buttonRow}>
-              <TouchableOpacity
-                style={styles.loginButton}
-                onPress={handleLogin}
-              >
-                <Text style={styles.buttonTextLogin}>Login</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+            <Text style={styles.buttonTextLogin}>Login</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -105,12 +112,11 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     width: "100%",
-    height: "80%",
-    opacity: 1, // Changé à 1 car nous utilisons maintenant un overlay
+    height: "60%",
   },
   darkOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Couche sombre semi-transparente
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   overlay: {
     flex: 1,
@@ -121,10 +127,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#fff", // Texte en blanc
+    color: "#fff",
     textAlign: "left",
     maxWidth: 300,
-    textShadowColor: "rgba(0, 0, 0, 0.75)", // Ombre pour meilleure lisibilité
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 10,
   },
@@ -133,9 +139,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    marginTop: -200,
+    marginTop: -100,
     paddingHorizontal: 20,
+  },
+  scrollViewContent: {
     paddingTop: 10,
+    paddingBottom: 200,
     alignItems: "center",
   },
   inputContainer: {
@@ -150,9 +159,9 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: "#f5f5f5",
     borderRadius: 25,
-    paddingVertical: 10,
+    paddingVertical: 15,
     paddingHorizontal: 15,
-    marginBottom: 10,
+    marginBottom: 15,
     fontSize: 16,
     color: "#000",
     width: "100%",
@@ -169,23 +178,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     borderRadius: 25,
   },
-  signupButton: {
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#000",
-    paddingVertical: 15,
-    paddingHorizontal: 40,
-    borderRadius: 25,
-  },
   buttonTextLogin: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#fff",
-  },
-  buttonTextRegister: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#000",
   },
 });
 
