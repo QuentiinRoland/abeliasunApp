@@ -5,7 +5,7 @@ import {
   createUserWithEmailAndPassword,
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { firebaseConfig } from "./firebaseConfig";
+import { firebaseConfig } from "./firebaseConfig.js";
 
 console.log("Firebase Config:", firebaseConfig);
 const app = initializeApp(firebaseConfig);
