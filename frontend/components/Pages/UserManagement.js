@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
-import { firestore } from "../../config/firebaseConfig";
+import { firestore } from "../../config/firebaseInit";
 
 const UserManagement = () => {
   const [name, setName] = useState("");
