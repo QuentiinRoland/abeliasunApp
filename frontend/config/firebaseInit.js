@@ -1,3 +1,4 @@
+import Constants from "expo-constants";
 import { initializeApp } from "firebase/app";
 import {
   getAuth,
@@ -5,9 +6,8 @@ import {
   createUserWithEmailAndPassword,
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { firebaseConfig } from "./firebaseConfig.js";
 
-console.log("Firebase Config:", firebaseConfig);
+const firebaseConfig = Constants.expoConfig?.extra?.firebase;
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);
