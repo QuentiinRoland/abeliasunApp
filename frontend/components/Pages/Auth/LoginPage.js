@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Text,
   View,
@@ -10,7 +10,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
-  ScrollView,
+  TouchableWithoutFeedback,
+  Animated,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { auth, signInWithEmailAndPassword } from "../../../config/firebaseInit";
@@ -19,6 +20,38 @@ const LoginPage = ({ onLogin }) => {
   const navigation = useNavigation();
   const [inputEmail, setInputEmail] = useState("");
   const [inputPassword, setInputPassword] = useState("");
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setKeyboardVisible(true);
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setKeyboardVisible(false);
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
+      }
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, [fadeAnim]);
 
   const handleInputName = (text) => setInputEmail(text);
   const handleInputPassword = (text) => setInputPassword(text);
@@ -36,72 +69,98 @@ const LoginPage = ({ onLogin }) => {
     }
   };
 
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
+
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
-    >
-      <ImageBackground
-        source={require("../../../assets/abeliasunLogin2.jpg")}
-        style={styles.backgroundImage}
+    <TouchableWithoutFeedback onPress={dismissKeyboard}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
-        <View style={styles.darkOverlay}>
-          <View style={styles.overlay}>
-            <Text style={styles.title}>
-              Transformez Votre Jardin en Un Havre de Paix et de Beauté
-            </Text>
+        <Animated.View
+          style={[
+            styles.upperSection,
+            {
+              opacity: fadeAnim,
+              transform: [
+                {
+                  translateY: fadeAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-30, 0],
+                  }),
+                },
+              ],
+            },
+            !isKeyboardVisible ? null : { height: 0 },
+          ]}
+        >
+          <ImageBackground
+            source={require("../../../assets/abeliasunLogin2.jpg")}
+            style={styles.backgroundImage}
+          >
+            <View style={styles.darkOverlay}>
+              <View style={styles.overlay}>
+                <Text style={styles.title}>
+                  Transformez Votre Jardin en Un Havre de Paix et de Beauté
+                </Text>
+              </View>
+            </View>
+          </ImageBackground>
+        </Animated.View>
+
+        <View
+          style={[
+            styles.loginSection,
+            isKeyboardVisible && styles.loginSectionKeyboardOpen,
+          ]}
+        >
+          <Image
+            source={require("../../../assets/abeliasunWallpaperLogin.jpg")}
+            style={[styles.logo, isKeyboardVisible && styles.logoKeyboardOpen]}
+            resizeMode="contain"
+          />
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Votre adresse mail"
+              placeholderTextColor="#888"
+              style={styles.input}
+              onChangeText={handleInputName}
+              value={inputEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              returnKeyType="next"
+            />
+            <TextInput
+              placeholder="Votre mot de passe"
+              placeholderTextColor="#888"
+              secureTextEntry
+              style={styles.input}
+              onChangeText={handleInputPassword}
+              value={inputPassword}
+              returnKeyType="done"
+              onSubmitEditing={() => {
+                Keyboard.dismiss();
+                handleLogin();
+              }}
+            />
+          </View>
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              style={styles.loginButton}
+              onPress={() => {
+                Keyboard.dismiss();
+                handleLogin();
+              }}
+            >
+              <Text style={styles.buttonTextLogin}>Login</Text>
+            </TouchableOpacity>
           </View>
         </View>
-      </ImageBackground>
-
-      <ScrollView
-        style={styles.loginSection}
-        contentContainerStyle={styles.scrollViewContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        <Image
-          source={require("../../../assets/abeliasunWallpaperLogin.jpg")}
-          style={styles.logo}
-        />
-        <View style={styles.inputContainer}>
-          <TextInput
-            placeholder="Votre adresse mail"
-            placeholderTextColor="#888"
-            style={styles.input}
-            onChangeText={handleInputName}
-            value={inputEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            returnKeyType="next"
-          />
-          <TextInput
-            placeholder="Votre mot de passe"
-            placeholderTextColor="#888"
-            secureTextEntry
-            style={styles.input}
-            onChangeText={handleInputPassword}
-            value={inputPassword}
-            returnKeyType="done"
-            onSubmitEditing={() => {
-              Keyboard.dismiss();
-              handleLogin();
-            }}
-          />
-        </View>
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            style={styles.loginButton}
-            onPress={() => {
-              Keyboard.dismiss();
-              handleLogin();
-            }}
-          >
-            <Text style={styles.buttonTextLogin}>Login</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -110,9 +169,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
+  upperSection: {
+    height: "45%",
+  },
   backgroundImage: {
     width: "100%",
-    height: "60%",
+    height: "100%",
   },
   darkOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -139,13 +201,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    marginTop: -100,
+    marginTop: -30,
     paddingHorizontal: 20,
-  },
-  scrollViewContent: {
-    paddingTop: 10,
-    paddingBottom: 200,
+    paddingTop: 20,
     alignItems: "center",
+  },
+  loginSectionKeyboardOpen: {
+    marginTop: 0,
+    paddingTop: 20,
   },
   inputContainer: {
     width: "100%",
@@ -153,8 +216,12 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 250,
-    height: 100,
-    marginBottom: 30,
+    height: 80,
+    marginBottom: 20,
+  },
+  logoKeyboardOpen: {
+    height: 60,
+    marginBottom: 15,
   },
   input: {
     backgroundColor: "#f5f5f5",
